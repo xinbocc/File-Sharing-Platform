@@ -1,0 +1,78 @@
+import net from 'net';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Resolve __dirname for ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Settings
+const PORT = 3000;
+const inboxPath = path.resolve(__dirname, '../storage/inbox');
+
+const server = net.createServer((socket) => {
+    console.log('Incoming connection from:', socket.remoteAddress);
+
+    let fileStream;
+    let state = 'waiting-metadata';
+    let filename = '';
+    let filesize = 0;
+    let receivedBytes = 0;
+    let buffer = '';
+
+    socket.on('data', (chunk) => {
+        if (state === 'waiting-metadata') {
+            buffer += chunk.toString();
+        
+            if (buffer.includes('\n')) {
+                const [metaJSON, rest] = buffer.split('\n', 2);
+                try {
+                    const metadata = JSON.parse(metaJSON);
+                    filename = metadata.filename;
+                    filesize = metadata.filesize;
+
+                    console.log(`Receiving file: ${filename}, size: ${filesize} bytes`);
+
+                    fileStream = fs.createWriteStream(path.join(inboxPath, filename));
+                    state = 'receiving-file';
+
+                    // Pass remaining data to file stream
+                    const remainingBUffer = Buffer.from(rest, 'binary');
+                    receivedBytes += remainingBUffer.length;
+                    fileStream.write(remainingBuffer);
+                } catch (error) {
+                    console.error('Error parsing metadata:', error);
+                    socket.destroy();
+                }
+            }
+        } else if (state === 'receiving-file') {
+            receivedBytes += chunk.length;
+            fileStream.write(chunk);
+
+            if (receivedBytes >= filesize) {
+                fileStream.end();
+                console.log(`File ${filename} received successfully.`);
+                socket.end();
+            }
+        }
+    });
+
+    socket.on('end', () => {
+        if (fileStream) {
+            fileStream.end();
+        }
+        console.log('Connection ended.');
+    });
+
+    socket.on('error', (err) => {  
+        console.error('Socket error:', err);
+        if (fileStream) {
+            fileStream.end();
+        }
+    });
+});
+
+server.listen(PORT, () => {
+    console.log(`P2P server listening on port ${PORT}`);
+});
