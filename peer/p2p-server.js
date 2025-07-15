@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Settings
-const PORT = 3000;
+const PORT = 5001;
 const inboxPath = path.resolve(__dirname, '../storage/inbox');
 
 const server = net.createServer((socket) => {
@@ -22,6 +22,7 @@ const server = net.createServer((socket) => {
     let buffer = '';
 
     socket.on('data', (chunk) => {
+        console.log('Received data chunk:', chunk.length, 'bytes');
         if (state === 'waiting-metadata') {
             buffer += chunk.toString();
         
@@ -38,8 +39,8 @@ const server = net.createServer((socket) => {
                     state = 'receiving-file';
 
                     // Pass remaining data to file stream
-                    const remainingBUffer = Buffer.from(rest, 'binary');
-                    receivedBytes += remainingBUffer.length;
+                    const remainingBuffer = Buffer.from(rest, 'binary');
+                    receivedBytes += remainingBuffer.length;
                     fileStream.write(remainingBuffer);
                 } catch (error) {
                     console.error('Error parsing metadata:', error);
