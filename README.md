@@ -1,2 +1,2 @@
-# safebox
-A secure file storage and sharing platform with encryption, user accounts, and time-limited sharing links.
+# Secure P2P File Sharing Platform
+A web-based application that allows users connected in the same network (LAN or WAN) to discover each other and exchange encrypted files directly via TCP sockets, with no central server, no cloud storage, and full data ownership.
