@@ -2,7 +2,7 @@ import net from 'net';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { encryptFile } from './encryption';
+import { encryptFile } from './encryption.js';
 
 // Setup __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -11,19 +11,18 @@ const __dirname = path.dirname(__filename);
 // Settings
 const PEER_IP = '127.0.0.1';
 const PORT = 5001;
-const FILENAME = 'testfile.txt'; // File to send
-const outboxPath = path.resolve(__dirname, '../storage/outbox', FILENAME);
-const ORIGINAL_PATH = path.join(outboxPath, FILENAME);
-const ENCRYPTED_PATH = path.join(outboxPath, `${FILENAME}.enc`);
+const OUTBOX = path.resolve(__dirname, '../storage/outbox');
 
 // Send file function
-async function sendFile() {
+async function sendFile(filename) {
+    const originalPath = path.join(OUTBOX, filename);
+    const encryptedPath = path.join(OUTBOX, `${filename}.enc`);
     // Encrypting file before sending
-    const iv = await encryptFile(ORIGINAL_PATH, ENCRYPTED_PATH);
-    const stats = fs.statSync(ENCRYPTED_PATH);
+    const iv = await encryptFile(originalPath, encryptedPath);
+    const stats = fs.statSync(encryptedPath);
 
     const metadata = {
-        filename: FILENAME,
+        filename: filename,
         filesize: stats.size,
         iv: iv.toString('hex') // Convert Buffer to hex str
     };
@@ -35,11 +34,12 @@ async function sendFile() {
         socket.write(JSON.stringify(metadata) + '\n');
         
         // Send file stream
-        const fileStream = fs.createReadStream(outboxPath);
+        const fileStream = fs.createReadStream(encryptedPath);
         fileStream.pipe(socket);
         
         fileStream.on('end', () => {
             console.log(`File ${metadata.filename} sent successfully.`);
+            fs.unlinkSync(encryptedPath); // optional cleanup
             socket.end();
         });
     });
@@ -49,7 +49,30 @@ async function sendFile() {
     });
 }
 
+// loop for sending all files in the outbox
+async function sendAllFiles() {
+    const files = fs.readdirSync(OUTBOX).filter(f => !f.endsWith('.enc'));
+
+    if (files.length === 0) {
+        console.log('No files to send in storage/outbox/');
+        return;
+    }
+
+    for (const file of files) {
+        try {
+            await sendFile(file);
+        } catch (err) {
+            console.error(`<> Failed to send ${file}:`, err.message);
+        }
+        
+    }
+
+    console.log('All files processed.');
+}
+
+
+
 // Start the file sending process
-sendFile().catch((err) => {
-    console.error('>>> Encryption/send error:', err);
-  });
+sendAllFiles().catch(err => {
+    console.error('Unexpected error:', err);
+});

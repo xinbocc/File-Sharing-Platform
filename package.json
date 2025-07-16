@@ -7,6 +7,7 @@
   "version": "1.0.0",
   "description": "A web-based application that allows users connected in the same network (LAN or WAN) to discover each other and exchange encrypted files directly via TCP sockets, with no central server, no cloud storage, and full data ownership.",
   "main": "index.js",
+  "type": "module",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
