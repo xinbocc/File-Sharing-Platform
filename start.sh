@@ -1,16 +1,20 @@
 #!/bin/bash
 
+echo "📦 Installing backend dependencies..."
+npm install
+
 # Start the backend (Express)
 echo "🚀 Starting backend..."
 node web-server/server.mjs &
-
-# Save the PID to stop later if needed
 BACKEND_PID=$!
 
-# Start the frontend (Vite in client/)
-echo "🌐 Starting frontend..."
+echo "📦 Installing frontend dependencies..."
 cd client
+npm install
+
+# Start the frontend (Vite)
+echo "🌐 Starting frontend..."
 npm run dev
 
-# When frontend stops, stop backend too
+# Kill backend when frontend stops
 kill $BACKEND_PID
