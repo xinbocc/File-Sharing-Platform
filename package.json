@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "express": "^5.1.0",
+    "multer": "^2.0.1",
     "socket.io": "^4.8.1"
   },
   "name": "secure-p2p-file-sharing-platform",
@@ -8,9 +9,8 @@
   "description": "A web-based application that allows users connected in the same network (LAN or WAN) to discover each other and exchange encrypted files directly via TCP sockets, with no central server, no cloud storage, and full data ownership.",
   "main": "index.js",
   "type": "module",
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"  
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
