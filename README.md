@@ -1,5 +1,5 @@
-# Secure P2P File Sharing Platform
-A web-base application that allows users to share files with no cloud storage.
+# Local File Sharing Platform
+A web-base application that allows a local computer to share files without any cloud storage.
 
 ## How To Use:
 1. Clone the repository in you computer.
@@ -14,5 +14,5 @@ chmod +x start.sh
 6. Generate a link.
 7. Share the link!
 
-## Built With:
+## Built W/
 HTML5, CSS3 + Tailwind CSS, JS, React.js, Vite, Node.js, Express.js, Multer.
