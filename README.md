@@ -7,7 +7,7 @@ A web-base application that allows users to share files with no cloud storage.
 3. To make **run.sh** executable and run the program:
 ```
 chmod +x start.sh
-./run.sh
+./start.sh
 ```
 4. Open the link: http://localhost:5173/
 5. Upload a file.
